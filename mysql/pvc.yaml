@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+  namespace: cctv
+  labels:
+    ostraining: "lamp"
+  annotations: 
+    storageClassName: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: cctv
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "500m"
+        env: 
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom: 
+             secretKeyRef:
+                name: mysql-credentials
+                key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_USER
+          valueFrom: 
+             secretKeyRef:
+                name: mysql-credentials
+                key: MYSQL_USER 
+        - name: MYSQL_PASSWORD
+          valueFrom: 
+             secretKeyRef:
+                name: mysql-credentials
+                key: MYSQL_PASSWORD 
+        - name: MYSQL_DATABASE
+          value: cctv_db
+        livenessProbe: 
+           tcpSocket:
+             port: 3306 
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          subPath: data
+          name: database
+      volumes:
+        - name: database
+          persistentVolumeClaim: 
+            claimName: mypvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: cctv
+  labels:
+    ostraining: "lamp"
+spec:
+  selector:
+    app: mysql
+  ports:
+  - port: 3306
+    protocol: TCP
+  type: ClusterIP
+
+

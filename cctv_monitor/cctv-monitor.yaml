@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cctv-service-qa
+  namespace: cct
+  labels:
+    app: cctv-service-qa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cctv-service-qa
+  template:
+    metadata:
+      labels:
+        app: cctv-service-qa
+    spec:
+      containers:
+        - name: cctv-service-qa
+          image: skripter/cctv_app_headless:1.7
+          command: ["tail", "-F", "anything"]
+          env:
+            - name: USER
+              value: "cctvservice"
+            - name: PASSWORD
+              value: "admin123"
+            - name: NVR_CONFIG_TABLE
+              value: "nvr_config"
+            - name: SITE_CONFIG_TABLE
+              value: "site_config"
+            - name: PING_INTERVAL_TABLE
+              value: "ping_interval"
+            - name: CCTV_STATUS_TABLE
+              value: "cctv_status"
+            - name: NVR_STATUS_TABLE
+              value: "nvr_status"
+            - name: SITE_STATUS_TABLE
+              value: "site_status"
+            - name: HDD_STATUS_TABLE
+              value: "hdd_status"
+            - name: SITE_DEFECT_LOG_TABLE
+              value: "site_defect_log_status"
+            - name: CCTV_DEFECT_LOG_TABLE
+              value: "cctv_defect_log_status"
+            - name: NVR_DEFECT_LOG_TABLE
+              value: "nvr_defect_log_status"
+            - name: HDD_DEFECT_LOG_TABLE
+              value: "hdd_defect_log_status"
+            - name: NETWORK_CONFIGS_TABLE
+              value: "network_configs"
+            - name: HDD_CONFIGS_TABLE
+              value: "hdd_configs"
+            - name: PERFORMANCE_CONFIGS_TABLE
+              value: "performance_configs"
+            - name: NVR_ALERTS_TABLE
+              value: "nvr_alerts"
+            - name: HDD_ALERTS_TABLE
+              value: "hdd_alerts"
+            - name: CCTV_ALERTS_TABLE
+              value: "cctv_alerts"
+            - name: PAUSE_PERIODS_TABLE
+              value: "pause_periods"
+            - name: TZ
+              value: "Asia/Dubai"
+            - name: CCTV_DATABASE
+              value: "cctv_QA_live"
+            - name: MYSQL_HOST
+              value: "localhost"
+            - name: MYSQL_USER
+              value: "Infocare"
+            - name: MYSQL_PASS
+              value: "Info@1234"
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: DISPLAY
+              value: "0"
+          ports:
+            - containerPort: 87
+            - containerPort: 6080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cctv-service-qa
+spec:
+  selector:
+    app: cctv-service-qa
+  ports:
+    - name: web-port
+      protocol: TCP
+      port: 87
+      targetPort: 87
+    - name: vnc-port
+      protocol: TCP
+      port: 6080
+      targetPort: 6080
+  type: ClusterIP

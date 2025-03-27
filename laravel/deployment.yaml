@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cctv-app
+  namespace: cctv # Added namespace
+spec:
+  selector:
+    matchLabels:
+      app: cctv-app
+  template:
+    metadata:
+      labels:
+        app: cctv-app
+    spec:
+      containers:
+      - name: cctv-app
+        image: abhijith99954/cctv-php:v1
+        env:
+        - name: DB_HOST
+          value: "mysql-service"  # MySQL Service name
+        - name: DB_DATABASE
+          value: "cctv_db"
+        - name: DB_USERNAME
+          value: "cctv_user"
+        - name: DB_PASSWORD
+          value: "password"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8000
+        command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-service
+  namespace: cctv  # Added namespace
+spec:
+  selector:
+    app: cctv-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: NodePort
+
