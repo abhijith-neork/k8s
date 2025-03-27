@@ -4,19 +4,17 @@ metadata:
   name: php
   namespace: cctv
   labels:
-    ostraining: "lamp"
+    app: php
 spec:
   replicas: 1
   revisionHistoryLimit: 5
   selector:
     matchLabels:
       app: php
-      namespace: cctv
   template:
     metadata:
       labels:
         app: php
-        namespace: cctv
     spec:
       containers:
       - name: php
@@ -47,7 +45,7 @@ spec:
         - name: MYSQL_HOST
           value: mysql
         ports:
-        - containerPort: 8000
+        - containerPort: 80
         command: ["/bin/sh", "-c"]
         args: ["./Entrypoint.sh"]
 
@@ -55,18 +53,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: web
+  name: php-service
   namespace: cctv
-  labels:
-    ostraining: "lamp"
 spec:
   selector:
     app: php
   ports:
   - name: http
-    port: 8000       # Service port
-    targetPort: 8000 # Container port
+    port: 80          # Exposed service port
+    targetPort: 80  # Container application port
     protocol: TCP
   type: LoadBalancer
-
-

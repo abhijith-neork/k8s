@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cctv-service-qa
-  namespace: cct
+  namespace: cctv
   labels:
     app: cctv-service-qa
 spec:
@@ -62,18 +62,24 @@ spec:
               value: "pause_periods"
             - name: TZ
               value: "Asia/Dubai"
-            - name: CCTV_DATABASE
-              value: "cctv_QA_live"
-            - name: MYSQL_HOST
-              value: "localhost"
-            - name: MYSQL_USER
-              value: "Infocare"
-            - name: MYSQL_PASS
-              value: "Info@1234"
-            - name: MYSQL_PORT
-              value: "3306"
             - name: DISPLAY
               value: "0"
+            - name: MYSQL_USER
+              valueFrom: 
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: MYSQL_USER 
+            - name: MYSQL_PASS
+              valueFrom: 
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: MYSQL_PASSWORD 
+            - name: CCTV_DATABASE
+              value: "cctv_db"  
+            - name: MYSQL_HOST
+              value: "mysql"
+            - name: MYSQL_PORT
+              value: "3306" 
           ports:
             - containerPort: 87
             - containerPort: 6080
@@ -84,11 +90,13 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: cctv-service-qa
+  namespace: cctv
 spec:
   selector:
     app: cctv-service-qa

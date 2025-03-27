@@ -35,6 +35,6 @@ spec:
     app: frontend
   ports:
     - protocol: TCP
-      port: 3000
-      targetPort: 3000
-  type: ClusterIP
+      port: 80        # Expose service on port 80
+      targetPort: 3000 # Redirect traffic to container port 3000
+  type: LoadBalancer
